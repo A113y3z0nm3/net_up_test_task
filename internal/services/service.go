@@ -40,7 +40,7 @@ func (s *Service) Run() chan struct{} {
 			select {
 			case <-ticker.C:
 				// Проверяем подключения
-				s.Check()
+				s.check()
 			case <-doneChannel:
 				// Останавливаем ticker
 				ticker.Stop()
@@ -54,7 +54,7 @@ func (s *Service) Run() chan struct{} {
 }
 
 // Check Проверяет активные подключения по таймауту
-func (s *Service) Check() {
+func (s *Service) check() {
 	s.mux.RLock()
 
 	// Итерируемся по списку активных подключений
@@ -62,7 +62,7 @@ func (s *Service) Check() {
 		// Если прошло времени больше, чем заданный таймаут - удаляем клиента из кэша
 		if time.Since(client.LastRequest) > s.timeout {
 			s.mux.RUnlock()
-			s.Delete(ip)
+			s.delete(ip)
 			s.mux.RLock()
 		}
 	}
@@ -96,7 +96,7 @@ func (s *Service) Save(ip string) {
 }
 
 // Delete Удаляет подключение из кэша
-func (s *Service) Delete(ip string) {
+func (s *Service) delete(ip string) {
 	// Удаляем по ключу (айпи)
 	s.mux.Lock()
 	delete(s.clients, ip)
