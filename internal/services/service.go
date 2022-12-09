@@ -106,9 +106,6 @@ func (s *Service) delete(ip string) {
 
 // Get Отдает список активных соединений из кэша
 func (s *Service) Get() []models.UserDTO {
-	// Счетчик (для итогового списка)
-	var k int
-
 	// Создаем итоговый список
 	result := make([]models.UserDTO, 0, len(s.clients))
 	
@@ -117,12 +114,10 @@ func (s *Service) Get() []models.UserDTO {
 	// Итерируемся по списку подключений
 	for ip, c := range s.clients {
 		// Добавляем клиентов в итоговый список
-		result[k] = models.UserDTO{
+		result = append(result, models.UserDTO{
 			FirstRequest: c.FirstRequest.Format(s.timeFormat),
 			IP: ip,
-		}
-
-		k += 1
+		})
 	}
 
 	s.mux.RUnlock()
