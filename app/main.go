@@ -59,7 +59,7 @@ func main() {
 	log.Printf("server listening on port %s", Port)
 
 	// Graceful shutdown
-	quit := make(chan os.Signal)
+	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
 
