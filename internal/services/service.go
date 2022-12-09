@@ -6,16 +6,18 @@ import (
 	"net_up_test_task/internal/models"
 )
 
-// ServiceConfig Конфигурация для сервиса
+// ServiceConfig Конфигурация для сервиса (задается в main.go)
 type ServiceConfig struct {
-	Timeout	time.Duration			// Таймаут (задается в main.go)
+	Timeout		time.Duration			// Таймаут 
+	TimeFormat	string					// Формат времени первого запроса
 }
 
 // Service Сервис, отвечающий за хранение и управление активными соединениями
 type Service struct {
-	timeout	time.Duration			// Таймаут (задается в ServiceConfig)
-	mux		sync.RWMutex			// Мютекс (для конкуррентного доступа)
-	clients	map[string]models.User	// Список активных соединений (клиентов)
+	timeout		time.Duration			// Таймаут (задается в ServiceConfig)
+	timeFormat	string					// Формат времени первого запроса (задается в ServiceConfig)
+	mux			sync.RWMutex			// Мютекс (для конкуррентного доступа)
+	clients		map[string]models.User	// Список активных соединений (клиентов)
 }
 
 // NewService Фабрика для сервиса
@@ -53,7 +55,7 @@ func (s *Service) Run() chan struct{} {
 	return doneChannel
 }
 
-// Check Проверяет активные подключения по таймауту
+// check Проверяет активные подключения по таймауту
 func (s *Service) check() {
 	s.mux.RLock()
 
@@ -85,7 +87,6 @@ func (s *Service) Save(ip string) {
 		client = models.User{
 			FirstRequest: time.Now(),
 			LastRequest: time.Now(),
-			IP: ip,
 		}
 	}
 
@@ -95,7 +96,7 @@ func (s *Service) Save(ip string) {
 	s.mux.Unlock()
 }
 
-// Delete Удаляет подключение из кэша
+// delete Удаляет подключение из кэша
 func (s *Service) delete(ip string) {
 	// Удаляем по ключу (айпи)
 	s.mux.Lock()
@@ -104,16 +105,24 @@ func (s *Service) delete(ip string) {
 }
 
 // Get Отдает список активных соединений из кэша
-func (s *Service) Get() []models.User {
-	s.mux.RLock()
-	
+func (s *Service) Get() []models.UserDTO {
+	// Счетчик (для итогового списка)
+	var k int
+
 	// Создаем итоговый список
-	result := make([]models.User, 0, len(s.clients))
+	result := make([]models.UserDTO, 0, len(s.clients))
+	
+	s.mux.RLock()
 
 	// Итерируемся по списку подключений
-	for _, c := range s.clients {
+	for ip, c := range s.clients {
 		// Добавляем клиентов в итоговый список
-		result = append(result, c)
+		result[k] = models.UserDTO{
+			FirstRequest: c.FirstRequest.Format(s.timeFormat),
+			IP: ip,
+		}
+
+		k += 1
 	}
 
 	s.mux.RUnlock()

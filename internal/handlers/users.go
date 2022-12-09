@@ -23,7 +23,7 @@ func (h *Handler) GetUsers(ctx *gin.Context) {
 	// Маппим данные в ответ
 	for k := 0; k < len (clients); k++ {
 		response[k].IP = clients[k].IP
-		response[k].FirstRequest = clients[k].FirstRequest.Format("2006-01-02 15:04:05")
+		response[k].FirstRequest = clients[k].FirstRequest
 	}
 
 	// Отдаем ответ

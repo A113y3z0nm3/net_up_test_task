@@ -9,7 +9,7 @@ import (
 // service Интерфейс к слою services, отвечающему за хранение данных в кэше
 type service interface {
 	Save(ip string)
-	Get() ([]models.User)
+	Get() []models.UserDTO
 }
 
 // HandlerConfig Конфигурация к обработчику

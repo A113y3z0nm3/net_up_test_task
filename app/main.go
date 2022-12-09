@@ -17,9 +17,10 @@ import (
 
 // Конфигурация
 const (
-	TOut = time.Minute * 30	// Таймаут
-	Host = "0.0.0.0"		// Адрес
-	Port = "8080"			// Порт
+	Format	= "2006-01-02 15:04:05"	// Формат времени для ответа (/admin/users)
+	TOut 	= time.Minute * 30		// Таймаут
+	Host 	= "0.0.0.0"				// Адрес
+	Port 	= "8080"				// Порт
 )
 
 func main() {
@@ -29,13 +30,14 @@ func main() {
 
 	// Инициализируем сервис
 	service := services.NewService(&services.ServiceConfig{
-		Timeout: TOut,
+		Timeout:	TOut,
+		TimeFormat:	Format,
 	})
 
 	// Регистрируем обработчик
 	handlers.RegisterHandler(&handlers.HandlerConfig{
-		Router: router,
-		Service: service,
+		Router:		router,
+		Service:	service,
 	})
 
 	// Запускаем цикл в слое services
